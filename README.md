@@ -1,11 +1,13 @@
 FILE TAGGING w/ VOICE RECOGNITION
 
+<code>
 +--------------+------+------+
 |              | File | tags |
 |  FILE DISP   | List +------+
 |  DIR DISP    |      |notes |
 |              |      |      |
 +--------------+------+------+
+</code>
 
 up + down keys, file selector
 

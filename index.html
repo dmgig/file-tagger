@@ -36,15 +36,15 @@
     </div>
 
     <div id="file_data" class="col-md-3">
-      <div>{{fileList[activeFile].file}}<div>
+      <div>{{fileList[activeFile].path}}<div>
       <div>{{fileList[activeFile].hash}}</div>
       <div class="speech">
         <input type="text" name="q" id="transcript" placeholder="Speak" />
-        <img onclick="startDictation()" src="http://i.imgur.com/cHidSVu.gif" />
+        <img src="http://i.imgur.com/cHidSVu.gif" />
       </div>
       <h3>tags</h3>
       <div>
-        <span class="badge" ng-repeat="tag in tagList">{{tag}}</span>
+        <span class="badge" ng-repeat="tag in tagList track by $index">{{tag}}</span>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
     app.controller('ftController', ['$scope', '$http', function ($scope, $http) {
         
       $scope.fileList   = [];
-      $scope.activeFile = 0;
+      $scope.activeFile = false;
       
       $scope.tagList = [];
       
@@ -71,7 +71,8 @@
         $scope.fileList = response.data;
         moveActiveFile(0);
       }, function errorCallback(response) {
-        console.log('error '+response);
+        console.log('error');
+        console.log(response);
       });        
       
       $scope.clickFile = function(index){
@@ -106,16 +107,94 @@
       $scope.$on('$destroy',function(){
         $doc.off('keydown', $scope.keyPress);
       });
-      
-      function moveActiveFile(new_key){
-        $scope.activeFile = new_key;
-        $('.filelist').removeClass('active');
-        var newFileDiv = $("#files").find("div[data-fileid='"+new_key+"']");
-        newFileDiv.addClass('active');
-        $scope.tagList = [];
+
+
+      var createFile = function(data){
+        $http({
+          method: 'POST',
+          url:    '/api/files',
+          data:   data
+        }).then(function successCallback(response) {
+          return response;
+        }, function errorCallback(response) {
+          console.log('error');
+          console.log(response);
+        });      
       }
       
-      moveActiveFile(0);
+      var retrieveFileByPath = function(path, callback){
+        $http({
+          method: 'GET',
+          url:    '/api/files/path/'+encodeURIComponent(path)
+        }).then(function successCallback(response) {
+          console.log(response);
+          callback(response.data);
+        }, function errorCallback(response) {
+          console.log('error');
+          console.log(response);
+        });       
+      }
+      
+      var updateFile = function(data, callback){
+        console.log('UPDATING FILE');
+        console.log(data);
+        $http({
+          method: 'PUT',
+          url:    '/api/files/'+data._id,
+          data:   data
+        }).then(function successCallback(response) {
+          console.log(response);
+          callback(response.data);
+        }, function errorCallback(response) {
+          console.log('error');
+          console.log(response);
+        });       
+      }
+
+      
+      function moveActiveFile(new_key){
+      
+        console.log('NEW KEY: '+new_key);
+      
+        // If there is an exit file and has an id, update it
+        console.log($scope.activeFile);
+        if($scope.activeFile){
+          if(typeof $scope.fileList[$scope.activeFile]._id !== typeof undefined){
+            $scope.fileList[$scope.activeFile].tags = $scope.tagList;
+            updateFile($scope.fileList[$scope.activeFile], function(response){
+              console.log('UPDATED '+$scope.fileList[$scope.activeFile]._id);
+            });
+          }
+        }
+      
+        // Newly selected file
+        $scope.activeFile = new_key;
+        
+        var current_path = $scope.fileList[$scope.activeFile].path;
+        retrieveFileByPath(current_path, function(data){
+          console.log(data);
+          if(data === null){
+            console.log('no file saved. Creating record.');
+            createFile($scope.fileList[$scope.activeFile], function(data){
+              console.log('created file');
+              console.log(data);
+              $scope.fileList[$scope.activeFile]._id = data._id;          
+          
+              $('.filelist').removeClass('active');
+              var newFileDiv = $("#files").find("div[data-fileid='"+$scope.activeFile+"']");
+              newFileDiv.addClass('active');
+              $scope.tagList = [];
+            });
+
+          }else{
+            $scope.fileList[$scope.activeFile]._id = data._id;
+            $('.filelist').removeClass('active');
+            var newFileDiv = $("#files").find("div[data-fileid='"+$scope.activeFile+"']");
+            newFileDiv.addClass('active');
+            $scope.tagList = data.tags;
+          }        
+        });
+      }
       
       /**
        * make file active above current
@@ -199,7 +278,7 @@
         $scope.tagList.push(tag);
         $scope.$apply();
       }
-
+        
         
     }]);
   

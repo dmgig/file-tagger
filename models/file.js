@@ -4,9 +4,9 @@ var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
 var FileSchema   = new Schema({
-    filepath: String,
-    file_md5: String,
-    filetags: Array,
+    path:     String,
+    md5:      String,
+    tags:     Array,
     added:    { type: Date, default: Date.now },
     updated:  { type: Date, default: Date.now }
 });

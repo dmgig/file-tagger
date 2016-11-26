@@ -58,13 +58,17 @@ router.route('/files')
 	.post(function(req, res) {
 		
 		var file = new File();		// create a new instance of the File model
-		file.name = req.body.name;  // set the Files name (comes from the request)
+    console.log(req.body)
+    file.path = '/Volumes/EXTERNAL-DRIVE/'+req.body.path;
+    file.file = req.body.file;
+    file.md5  = md5File.sync(file.path);
+    file.tags = req.body.tags;
 
 		file.save(function(err) {
 			if (err)
 				res.send(err);
 
-			res.json({ message: 'File created!' });
+			res.json({ _id: file._id });
 		});
 
 		
@@ -77,6 +81,20 @@ router.route('/files')
 				res.send(err);
 
 			res.json(files);
+		});
+	});
+
+router.route('/files/path/:path')
+
+	// get the File with that id
+	.get(function(req, res) {
+		var path = decodeURI(req.params.path)
+		path = '/Volumes/EXTERNAL-DRIVE/'+path;
+		console.log(path);
+		File.findOne({ 'path': path }, 'file path md5 tags', function(err, file) {
+			if (err)
+				res.send(err);
+			res.json(file);
 		});
 	});
 
@@ -100,7 +118,7 @@ router.route('/files/:id')
 			if (err)
 				res.send(err);
 
-			file.name = req.body.name;
+      file.tags = req.body.tags;
 			file.save(function(err) {
 				if (err)
 					res.send(err);
@@ -109,19 +127,20 @@ router.route('/files/:id')
 			});
 
 		});
-	})
-
-	// delete the File with this id
-	.delete(function(req, res) {
-		File.remove({
-			_id: req.params.id
-		}, function(err, File) {
-			if (err)
-				res.send(err);
-
-			res.json({ message: 'Successfully deleted' });
-		});
 	});
+
+//  delete the File with this id
+// 	.delete(function(req, res) {
+// 		File.remove({
+// 			_id: req.params.id
+// 		}, function(err, File) {
+// 			if (err)
+// 				res.send(err);
+// 
+// 			res.json({ message: 'Successfully deleted' });
+// 		});
+// 	});
+
 
 // on routes that end in /Files
 // ----------------------------------------------------
@@ -136,7 +155,7 @@ router.route('/filelist')
       files.forEach(file => {
         //var hash = md5File.sync(filesDir+'/'+file);
         var hash;
-        filelist.push({ file: file, path: 'UNSORTED/'+file, hash: hash });
+        filelist.push({ _id: null, file: file, path: 'UNSORTED/'+file, hash: hash });
       });
       res.json(filelist);
     })

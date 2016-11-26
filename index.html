@@ -109,13 +109,13 @@
       });
 
 
-      var createFile = function(data){
+      var createFile = function(data, callback){
         $http({
           method: 'POST',
           url:    '/api/files',
           data:   data
         }).then(function successCallback(response) {
-          return response;
+          callback(response.data);
         }, function errorCallback(response) {
           console.log('error');
           console.log(response);

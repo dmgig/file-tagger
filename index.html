@@ -7,7 +7,7 @@
     .active{ background-color: pink; }
     #files{ overflow: hidden; }
     .speech {border: 1px solid #DDD; width: 300px; padding: 0; margin: 0}
-    .speech input {border: 0; width: 240px; display: inline-block; height: 30px;}
+    .speech input {border: 0; width: 50%; display: inline-block; height: 30px;}
     .speech img {float: right; width: 40px }    
   </style>
 </head>
@@ -24,25 +24,28 @@
   <div class="container-fluid">
 
     <div id="display" class="col-md-7">
-      <object data="{{activeFile.path}}" type="application/pdf" width="100%" height="800px">
-        alt : <a href="{{activeFile.path}}">{{activeFile.path}}</a>
+      <object data="{{fileList[activeFile].path}}" type="application/pdf" width="100%" height="800px">
+        alt : <a href="{{fileList[activeFile].path}}">{{fileList[activeFile].path}}</a>
       </object>
     </div>
 
     <div id="files" class="col-md-2">
-      <div class="filelist" ng-repeat="file in fileList" ng-click="makeActiveFile(file, $event)">
+      <div class="filelist" data-fileid="{{$index}}" ng-repeat="file in fileList track by $index" ng-click="clickFile($index)">
         {{file.file}}
       </div>
     </div>
 
     <div id="file_data" class="col-md-3">
-      <div>{{activeFile.file}}<div>
-      <div>{{activeFile.hash}}</div>
+      <div>{{fileList[activeFile].file}}<div>
+      <div>{{fileList[activeFile].hash}}</div>
       <div class="speech">
         <input type="text" name="q" id="transcript" placeholder="Speak" />
         <img onclick="startDictation()" src="http://i.imgur.com/cHidSVu.gif" />
       </div>
-      <div>{{activeFile.tags}}</div>
+      <h3>tags</h3>
+      <div>
+        <span class="badge" ng-repeat="tag in tagList">{{tag}}</span>
+      </div>
     </div>
 
   </div>
@@ -55,7 +58,9 @@
     app.controller('ftController', ['$scope', '$http', function ($scope, $http) {
         
       $scope.fileList   = [];
-      $scope.activeFile;
+      $scope.activeFile = 0;
+      
+      $scope.tagList = [];
       
       // Simple GET request example:
       $http({
@@ -63,44 +68,137 @@
         url:    '/api/filelist'
       }).then(function successCallback(response) {
         console.log(response);
-        $scope.fileList = response.data;  
+        $scope.fileList = response.data;
+        moveActiveFile(0);
       }, function errorCallback(response) {
         console.log('error '+response);
       });        
       
-      $scope.makeActiveFile = function(file, $event){
-         console.log(file);
-         console.log($event);
-         
-         $('.filelist').removeClass('active');
-         $($event.currentTarget).addClass('active');
-         $scope.activeFile = file;
+      $scope.clickFile = function(index){
+         moveActiveFile(index);
       }
 
-      $scope.startDictation = function() {
- 
-        if (window.hasOwnProperty('webkitSpeechRecognition')) {
- 
-          var recognition = new webkitSpeechRecognition();
- 
-          recognition.continuous = false;
-          recognition.interimResults = false;
- 
-          recognition.lang = "en-US";
-          recognition.start();
- 
-          recognition.onresult = function(e) {
-            document.getElementById('transcript').value
-                                     = e.results[0][0].transcript;
-            recognition.stop();
-          };
- 
-          recognition.onerror = function(e) {
-            recognition.stop();
-          }
- 
+      $scope.keyPress = function($event){
+        // 40 = up 38 = down, 37 = left, 39 = right
+        var keyCode = $event.which || $event.keyCode;
+        console.log(keyCode);
+        switch(keyCode){
+          case 38:
+            keyPressedUp($event);
+            break;
+          case 40:
+            keyPressedDown($event);
+            break;
+          case 39:
+            keyPressedRight($event);
+            break;
+          case 37:
+            keyPressedLeft($event);
+            break;
+          default: break;
         }
-      }    
+        $scope.$apply(); 
+      }
+
+      var $doc = angular.element(document);
+
+      $doc.on('keydown', $scope.keyPress);
+      $scope.$on('$destroy',function(){
+        $doc.off('keydown', $scope.keyPress);
+      });
+      
+      function moveActiveFile(new_key){
+        $scope.activeFile = new_key;
+        $('.filelist').removeClass('active');
+        var newFileDiv = $("#files").find("div[data-fileid='"+new_key+"']");
+        newFileDiv.addClass('active');
+        $scope.tagList = [];
+      }
+      
+      moveActiveFile(0);
+      
+      /**
+       * make file active above current
+       * if at top of file list, do nothing
+       */
+      function keyPressedUp($event){
+        $event.preventDefault();
+        if($scope.activeFile == 0) return;
+        moveActiveFile(Number($scope.activeFile) - 1);
+      }
+
+      /**
+       * make file active below current
+       * if at bottom of file list, do nothing
+       */      
+      function keyPressedDown($event){
+        $event.preventDefault();
+        if($scope.activeFile == $scope.fileList.length - 1) return;
+        var new_key = Number($scope.activeFile) + 1;
+        console.log(new_key);
+        moveActiveFile(new_key);        
+      }
+      
+      /**
+       * Dictation
+       */
+      if (window.hasOwnProperty('webkitSpeechRecognition')) {
+
+        var recognition = new webkitSpeechRecognition();
+
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.lang = "en-US";
+
+        recognition.onresult = function(e) {
+          var result = e.results[0][0].transcript;
+          $('#transcript').val(result);
+          recognition.stop();
+          console.log('got result '+result);
+          dumpTag(result);
+          $('#transcript').val('');
+        };
+
+        recognition.onerror = function(e) {
+          recognition.stop();
+        }
+
+      }       
+
+      var keyIsPressed = false;
+      
+      function keyPressedRight($event){
+        $event.preventDefault();
+        if(!keyIsPressed)
+          recognition.start();
+        keyIsPressed = true;
+      }
+      
+      function keyUpRight($event){
+        $event.preventDefault();
+        keyIsPressed = false;
+        var keyCode = $event.which || $event.keyCode;
+        console.log(keyCode);
+        if(keyCode == 39){
+          recognition.stop();
+        }
+      }
+
+      $doc.on('keyup', keyUpRight);
+      $scope.$on('$destroy',function(){
+        $doc.off('keyup', keyUpRight);
+      });
+      
+      function keyPressedLeft($event){
+        $event.preventDefault();
+        recognition.stop();
+      }
+
+      var dumpTag = function(tag){
+        $scope.tagList.push(tag);
+        $scope.$apply();
+      }
 
         
     }]);

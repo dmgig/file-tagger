@@ -169,6 +169,7 @@
       
         // Newly selected file
         $scope.activeFile = new_key;
+        $scope.tagList = [];
         
         var current_path = $scope.fileList[$scope.activeFile].path;
         retrieveFileByPath(current_path, function(data){
@@ -180,7 +181,6 @@
               console.log(data);
               $scope.fileList[$scope.activeFile]._id = data._id;          
             });
-            $scope.tagList = [];
           }else{
             $scope.fileList[$scope.activeFile]._id = data._id;
             $scope.tagList = data.tags;

@@ -1,13 +1,13 @@
 FILE TAGGING w/ VOICE RECOGNITION
 
-<code>
+<pre>
 +--------------+------+------+
 |              | File | tags |
 |  FILE DISP   | List +------+
 |  DIR DISP    |      |notes |
 |              |      |      |
 +--------------+------+------+
-</code>
+</pre>
 
 up + down keys, file selector
 
@@ -25,5 +25,10 @@ fileposition:
 note:
 
 REST
+----
 
-GET file
+GET    /api/files
+POST   /api/files
+GET    /api/files/:id
+PUT    /api/files/:id
+DELETE /api/files/:id

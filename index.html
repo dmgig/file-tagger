@@ -179,9 +179,8 @@
               console.log('created file');
               console.log(data);
               $scope.fileList[$scope.activeFile]._id = data._id;          
-              $scope.tagList = [];
             });
-
+            $scope.tagList = [];
           }else{
             $scope.fileList[$scope.activeFile]._id = data._id;
             $scope.tagList = data.tags;

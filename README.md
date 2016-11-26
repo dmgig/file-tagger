@@ -1,5 +1,7 @@
 FILE TAGGING w/ VOICE RECOGNITION
 
+In Progress.
+
 NodeJS, MongoDB.
 
 Only tested in Chrome.
@@ -13,9 +15,13 @@ Only tested in Chrome.
 +--------------+------+------+
 </pre>
 
+![In Progress](sample.png?raw=true "In Progress")
+
+
 up + down keys, file selector
 
 right key: ready new tag
+
 left key: delete last tag
 
 ```

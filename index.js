@@ -6,9 +6,14 @@ var express    = require('express');
 var bodyParser = require('body-parser');
 var app        = express();
 var morgan     = require('morgan');
+var fs         = require('fs');
+const md5File  = require('md5-file')
 
 // configure app
 app.use(morgan('dev')); // log requests to the console
+
+app.use(express.static('node_modules'))
+app.use(express.static('/Volumes/EXTERNAL-DRIVE'))
 
 // configure body parser
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,6 +24,13 @@ var port     = process.env.PORT || 8080; // set our port
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/file-tagger'); // connect to our database
 var File     = require('./models/file');
+
+// INDEX
+
+app.get('/', function(req,res) {
+  res.sendfile('index.html');
+});
+
 
 // ROUTES FOR OUR API
 // =============================================================================
@@ -111,6 +123,24 @@ router.route('/files/:id')
 		});
 	});
 
+// on routes that end in /Files
+// ----------------------------------------------------
+router.route('/filelist')
+
+	// create a File (accessed at POST http://localhost:8080/Files)
+	.get(function(req, res) {
+		
+    const filesDir = '/Volumes/EXTERNAL-DRIVE/UNSORTED';
+    var filelist = [];
+    fs.readdir(filesDir, (err, files) => {
+      files.forEach(file => {
+        //var hash = md5File.sync(filesDir+'/'+file);
+        var hash;
+        filelist.push({ file: file, path: 'UNSORTED/'+file, hash: hash });
+      });
+      res.json(filelist);
+    })
+	});
 
 // REGISTER OUR ROUTES -------------------------------
 app.use('/api', router);

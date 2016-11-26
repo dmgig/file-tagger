@@ -179,6 +179,7 @@
             createFile($scope.fileList[$scope.activeFile], function(data){
               console.log('created file');
               console.log(data);
+              $scope.fileList[$scope.activeFile].tags = $scope.tagList;
               $scope.fileList[$scope.activeFile]._id = data._id;          
             });
           }else{
@@ -267,6 +268,7 @@
       function keyPressedLeft($event){
         $event.preventDefault();
         recognition.stop();
+        $scope.tagList.pop();
       }
 
       var dumpTag = function(tag){

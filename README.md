@@ -56,3 +56,9 @@ DELETE /api/files/:id
 
 From: 
 https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4
+
+Known Bugs
+==========
+
+Tags sometimes will not save on a new item
+PDF display can go away

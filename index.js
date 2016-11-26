@@ -20,8 +20,6 @@ var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/file-tagger'); // connect to our database
 var File     = require('./models/file');
 
-console.log(File);
-
 // ROUTES FOR OUR API
 // =============================================================================
 
@@ -47,10 +45,10 @@ router.route('/files')
 	// create a File (accessed at POST http://localhost:8080/Files)
 	.post(function(req, res) {
 		
-		var File = new File();		// create a new instance of the File model
-		File.name = req.body.name;  // set the Files name (comes from the request)
+		var file = new File();		// create a new instance of the File model
+		file.name = req.body.name;  // set the Files name (comes from the request)
 
-		File.save(function(err) {
+		file.save(function(err) {
 			if (err)
 				res.send(err);
 
@@ -62,11 +60,11 @@ router.route('/files')
 
 	// get all the Files (accessed at GET http://localhost:8080/api/Files)
 	.get(function(req, res) {
-		File.find(function(err, Files) {
+		File.find(function(err, files) {
 			if (err)
 				res.send(err);
 
-			res.json(Files);
+			res.json(files);
 		});
 	});
 
@@ -76,7 +74,7 @@ router.route('/files/:id')
 
 	// get the File with that id
 	.get(function(req, res) {
-		File.findById(req.params.id, function(err, File) {
+		File.findById(req.params.id, function(err, file) {
 			if (err)
 				res.send(err);
 			res.json(File);
@@ -85,13 +83,13 @@ router.route('/files/:id')
 
 	// update the File with this id
 	.put(function(req, res) {
-		File.findById(req.params.id, function(err, File) {
+		File.findById(req.params.id, function(err, file) {
 
 			if (err)
 				res.send(err);
 
-			File.name = req.body.name;
-			File.save(function(err) {
+			file.name = req.body.name;
+			file.save(function(err) {
 				if (err)
 					res.send(err);
 

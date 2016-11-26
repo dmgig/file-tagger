@@ -10,9 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "~1.0.1",
+    "bootstrap": "^3.3.7",
     "express": "~4.0.0",
     "mongoose": "~3.6.13",
-    "mustache-express": "^1.2.4",
-    "pug": "^2.0.0-beta6"
+    "morgan": "~1.0.0"
   }
 }

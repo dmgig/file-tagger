@@ -179,20 +179,16 @@
               console.log('created file');
               console.log(data);
               $scope.fileList[$scope.activeFile]._id = data._id;          
-          
-              $('.filelist').removeClass('active');
-              var newFileDiv = $("#files").find("div[data-fileid='"+$scope.activeFile+"']");
-              newFileDiv.addClass('active');
               $scope.tagList = [];
             });
 
           }else{
             $scope.fileList[$scope.activeFile]._id = data._id;
-            $('.filelist').removeClass('active');
-            var newFileDiv = $("#files").find("div[data-fileid='"+$scope.activeFile+"']");
-            newFileDiv.addClass('active');
             $scope.tagList = data.tags;
-          }        
+          }
+          $('.filelist').removeClass('active');
+          var newFileDiv = $("#files").find("div[data-fileid='"+$scope.activeFile+"']");
+          newFileDiv.addClass('active');
         });
       }
       

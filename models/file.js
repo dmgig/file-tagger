@@ -4,6 +4,7 @@ var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
 var FileSchema   = new Schema({
+    file:     String,
     path:     String,
     md5:      String,
     tags:     Array,

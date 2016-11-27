@@ -59,6 +59,7 @@ router.route('/files')
 		
 		var file = new File();		// create a new instance of the File model
     console.log(req.body)
+    file.file = req.body.path.replace(/^.*[\\\/]/, '');
     file.path = '/Volumes/EXTERNAL-DRIVE/'+req.body.path;
     file.file = req.body.file;
     file.md5  = md5File.sync(file.path);
@@ -100,11 +101,37 @@ router.route('/files/path/:path')
 
 // on routes that end in /Files/:File_id
 // ----------------------------------------------------
+router.route('/files/search/:search')
+
+	// get the File with that id
+	.get(function(req, res) {
+		var search = decodeURI(req.params.search);
+		console.log(search);
+		File.find({
+		  '$or' :[ 
+		      { 'path': new RegExp(search, 'i') },
+		      { 'tags': new RegExp(search, 'i') }
+		  ]
+		}, 'file path md5 tags', function(err, file) {
+			if (err)
+				res.send(err);
+			for(i in file){
+			  file[i].path = file[i].path.replace(new RegExp('/Volumes/EXTERNAL-DRIVE/'), '');
+			  if(typeof file.file == undefined){
+			    file[i].file = req.body.path.replace(/^.*[\\\/]/, '');
+			  }
+			}
+			res.json(file);
+		});
+	});
+
+// on routes that end in /Files/:File_id
+// ----------------------------------------------------
 router.route('/files/:id')
 
 	// get the File with that id
 	.get(function(req, res) {
-		File.findById(req.params.id, function(err, file) {
+		File.findById(req.params.id, 'file path md5 tags', function(err, file) {
 			if (err)
 				res.send(err);
 			res.json(File);
@@ -117,7 +144,7 @@ router.route('/files/:id')
 
 			if (err)
 				res.send(err);
-
+      file.file = req.body.path.replace(/^.*[\\\/]/, '');
       file.tags = req.body.tags;
 			file.save(function(err) {
 				if (err)
@@ -127,19 +154,19 @@ router.route('/files/:id')
 			});
 
 		});
-	});
+	})
 
-//  delete the File with this id
-// 	.delete(function(req, res) {
-// 		File.remove({
-// 			_id: req.params.id
-// 		}, function(err, File) {
-// 			if (err)
-// 				res.send(err);
-// 
-// 			res.json({ message: 'Successfully deleted' });
-// 		});
-// 	});
+  // delete the File with this id
+	.delete(function(req, res) {
+		File.remove({
+			_id: req.params.id
+		}, function(err, File) {
+			if (err)
+				res.send(err);
+
+			res.json({ message: 'Successfully deleted' });
+		});
+	});
 
 
 // on routes that end in /Files

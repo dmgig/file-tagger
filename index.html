@@ -1,14 +1,32 @@
 <head>
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/jquery-ui/themes/base/all.css">
   <script src="/jquery/dist/jquery.min.js"></script>
+  <script src="/jquery-ui/ui/jquery-1-7.js"></script>
   <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="/angular/angular.js"></script>
   <style>
-    .active{ background-color: pink; }
-    #files{ overflow: hidden; }
-    .speech {border: 1px solid #DDD; width: 300px; padding: 0; margin: 0}
-    .speech input {border: 0; width: 50%; display: inline-block; height: 30px;}
-    .speech img {float: right; width: 40px }    
+    html, body{ width: 100%; height: 100%; }
+    h1, h2, h3{ color: #AAA; }
+    #files{ overflow: hidden; } 
+    #mic{ color: #AAA; }
+    #mic.recording{ color: #58D68D; }
+    #searchinput{ margin-bottom: 15px; }
+    #searchclear {
+      position: absolute;
+      right: 5px;
+      top: 0;
+      bottom: 15px;
+      height: 14px;
+      margin: auto;
+      font-size: 14px;
+      cursor: pointer;
+      color: #ccc;
+    }
+    .bge{ background-color: #F0F0F0; }
+    .active, .bge.active{ background-color: pink; }
+    .bgo{ background-color: #FFF; }
   </style>
 </head>
 <body ng-app="fileTaggerApp" ng-controller="ftController">
@@ -30,19 +48,37 @@
     </div>
 
     <div id="files" class="col-md-2">
-      <div class="filelist" data-fileid="{{$index}}" ng-repeat="file in fileList track by $index" ng-click="clickFile($index)">
-        {{file.file}}
+      <div>
+        <div class="btn-group">
+          <input ng-model="searchTerm" id="searchinput" type="search" class="form-control">
+          <span id="searchclear" ng-click="searchClear()" class="glyphicon glyphicon-remove-circle"></span>
+        </div>
+      </div>
+      
+      <div style="height: calc(100% - 115px); overflow: scroll">
+        <div class="filelist" 
+             data-fileid="{{$index}}" 
+             ng-repeat="file in fileList track by $index" 
+             ng-click="clickFile($index)"
+             ng-class-even="'bge'">
+          {{file.file}}
+        </div>
       </div>
     </div>
 
     <div id="file_data" class="col-md-3">
-      <div>{{fileList[activeFile].path}}<div>
-      <div>{{fileList[activeFile].hash}}</div>
+      <div><b>fullpath: </b> {{fileList[activeFile].path}}<div>
+      <div><b>md5 hash: </b> {{fileList[activeFile].hash}}</div>
+      <hr />
       <div class="speech">
-        <input type="text" name="q" id="transcript" placeholder="Speak" />
-        <img src="http://i.imgur.com/cHidSVu.gif" />
+        <input type="hidden" name="q" id="transcript" placeholder="Speak" />
       </div>
-      <h3>tags</h3>
+      <h3>
+        tags
+        <div style="float: right;">
+          <i id="mic" class="fa fa-microphone"></i>
+        </div>
+      </h3>
       <div>
         <span class="badge" ng-repeat="tag in tagList track by $index">{{tag}}</span>
       </div>
@@ -57,23 +93,63 @@
     var app = angular.module('fileTaggerApp', []);
     app.controller('ftController', ['$scope', '$http', function ($scope, $http) {
         
+      $scope.searchTerm = '';
       $scope.fileList   = [];
       $scope.activeFile = false;
-      
-      $scope.tagList = [];
+      $scope.tagList    = [];
+
+      var timer;      
+      $scope.$watch('searchTerm', function(n, o){
+        
+        clearTimeout(timer);
+        timer = setTimeout(function(){
+        
+          console.log("NEW: "+n);
+          console.log("OLD: "+o);
+          
+          if(n == '' && o == '') return;
+          
+          if(n == ''){
+            getFileList(); return;
+          }
+          
+          if(n != o){
+            console.log('SEARCH TERM: '+$scope.searchTerm);
+            $scope.fileList = [];
+            $http({
+              method: 'GET',
+              url:    '/api/files/search/'+$scope.searchTerm
+            }).then(function successCallback(response) {
+              console.log("SEARCH RESPONSE: "+$scope.searchTerm);
+              console.log(response);
+              $scope.fileList = response.data;
+              $scope.activeFile = false;
+              moveActiveFile(0);
+            }, function errorCallback(response) {
+              console.log('error');
+              console.log(response);
+            });        
+          }
+        }, 750);
+      });  
       
       // Simple GET request example:
-      $http({
-        method: 'GET',
-        url:    '/api/filelist'
-      }).then(function successCallback(response) {
-        console.log(response);
-        $scope.fileList = response.data;
-        moveActiveFile(0);
-      }, function errorCallback(response) {
-        console.log('error');
-        console.log(response);
-      });        
+      var getFileList = function(){
+        $scope.fileList = [];
+        $http({
+          method: 'GET',
+          url:    '/api/filelist'
+        }).then(function successCallback(response) {
+          console.log(response);
+          $scope.fileList = response.data;
+          $scope.activeFile = false;
+          moveActiveFile(0);
+        }, function errorCallback(response) {
+          console.log('error');
+          console.log(response);
+        });
+      }
+      getFileList();
       
       $scope.clickFile = function(index){
          moveActiveFile(index);
@@ -245,8 +321,10 @@
       
       function keyPressedRight($event){
         $event.preventDefault();
-        if(!keyIsPressed)
+        if(!keyIsPressed){
+          $("#mic").addClass('recording', 7500);
           recognition.start();
+        }
         keyIsPressed = true;
       }
       
@@ -254,8 +332,8 @@
         $event.preventDefault();
         keyIsPressed = false;
         var keyCode = $event.which || $event.keyCode;
-        console.log(keyCode);
         if(keyCode == 39){
+          $("#mic").removeClass('recording', 250);
           recognition.stop();
         }
       }
@@ -274,6 +352,10 @@
       var dumpTag = function(tag){
         $scope.tagList.push(tag);
         $scope.$apply();
+      }
+
+      $scope.searchClear = function(){
+        $scope.searchTerm = '';
       }
         
         

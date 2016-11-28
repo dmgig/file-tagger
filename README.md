@@ -1,10 +1,9 @@
-FILE TAGGING w/ VOICE RECOGNITION
+File Tagging with Voice Recognition
+===================================
 
-In Progress.
+Requires: NodeJS, MongoDB. Tested in Chrome.
 
-NodeJS, MongoDB.
-
-Only tested in Chrome.
+Features: Webkit Speech Recognition
 
 ![In Progress](sample.png?raw=true "In Progress")
 
@@ -12,7 +11,9 @@ keys:
 
 *up + down* file selector
 
-*right (hold)* ready new tag
+*right (hold)* start new tag, voice recognition
+
+*right (up)*   stop voice recognition
 
 *left key* delete last tag
 

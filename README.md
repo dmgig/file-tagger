@@ -6,17 +6,7 @@ NodeJS, MongoDB.
 
 Only tested in Chrome.
 
-<pre>
-+--------------+------+------+
-|              | File | tags |
-|  FILE DISP   | List +------+
-|  DIR DISP    |      |notes |
-|              |      |      |
-+--------------+------+------+
-</pre>
-
 ![In Progress](sample.png?raw=true "In Progress")
-
 
 up + down keys, file selector
 
@@ -26,39 +16,36 @@ left key: delete last tag
 
 ```
 { 
-  fileid:
-  filepath:
-  file_md5:
-  tags:
+  file: ''    // string, file name
+  path: ''    // string, full file path
+  md5:  ''    // string, md5 hash of file
+  updated: '' // datetime
+  added:   '' // datetime
+  tags: ''    // array, file tags
 }
 ```
 ```
+/* @todo */
 {
-  noteid:
-  fileid:
-  fileposition:
-  note:
+  noteid: ''
+  fileid: ''
+  fileposition: ''
+  note: ''
 }
 ```
 
 REST
 ----
-
+```
 GET    /api/files
-
 POST   /api/files
-
 GET    /api/files/:id
-
 PUT    /api/files/:id
-
 DELETE /api/files/:id
+
+GET    /api/files/path/:filepath
+GET    /api/files/search/:searchterm
+```
 
 From: 
 https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4
-
-Known Bugs
-==========
-
-Tags sometimes will not save on a new item
-PDF display can go away

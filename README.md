@@ -8,11 +8,13 @@ Only tested in Chrome.
 
 ![In Progress](sample.png?raw=true "In Progress")
 
-up + down keys, file selector
+keys:
 
-right key: ready new tag
+*up + down* file selector
 
-left key: delete last tag
+*right (hold)* ready new tag
+
+*left key* delete last tag
 
 ```
 { 

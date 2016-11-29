@@ -1,4 +1,4 @@
-REASEARCHER 1.0: File Tagging with Voice Recognition
+RESEARCHER 1.0: File Tagging with Voice Recognition
 ===================================================
 
 Requires: NodeJS, MongoDB. Tested in Chrome.

@@ -1,0 +1,76 @@
+<head>
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/jquery-ui-dist/jquery-ui.css">
+  <script src="/jquery/dist/jquery.min.js"></script>
+  <script src="/jquery-ui-dist/jquery-ui.js"></script>
+  <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/angular/angular.js"></script>
+  <script src="/angular-route/angular-route.min.js"></script>
+  <style>
+    html, body{ width: 100%; height: 100%; overflow: hidden; }
+    h1, h2, h3{ color: #AAA; }
+    #files{ overflow: hidden; } 
+    #mic{ color: #AAA; }
+    #mic.recording{ color: #58D68D; }
+    #searchinput{ margin-bottom: 15px; }
+    #searchclear {
+      position: absolute;
+      right: 5px;
+      top: 0;
+      bottom: 15px;
+      height: 14px;
+      margin: auto;
+      font-size: 14px;
+      cursor: pointer;
+      color: #ccc;
+    }
+    .bge{ background-color: #F0F0F0; }
+    .active, .bge.active{ background-color: pink; }
+    .bgo{ background-color: #FFF; }
+
+    #main-view{ padding-top: 55px; }
+  </style>
+  
+  <base href="/">
+  
+</head>
+<body ng-app="fileTaggerApp" ng-controller="ftController">
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Researcher 1.0</a>
+          </div>
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav">
+                  <li>
+                      <a href="/tagging">Tagging</a>
+                  </li>
+                  <li>
+                      <a href="/files">Files</a>
+                  </li>
+                  <li>
+                      <a href="/about">About</a>
+                  </li>
+              </ul>
+          </div>
+          <!-- /.navbar-collapse -->
+      </div>
+      <!-- /.container -->
+  </nav>
+
+  <div id="main-view" ng-view></div>
+  
+  <script src="app.js" type="text/javascript"></script>
+
+</body>

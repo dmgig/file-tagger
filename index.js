@@ -12,6 +12,7 @@ const md5File  = require('md5-file')
 // configure app
 app.use(morgan('dev')); // log requests to the console
 
+app.use(express.static('app'))
 app.use(express.static('node_modules'))
 app.use(express.static('/Volumes/EXTERNAL-DRIVE'))
 
@@ -24,13 +25,6 @@ var port     = process.env.PORT || 8080; // set our port
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/file-tagger'); // connect to our database
 var File     = require('./models/file');
-
-// INDEX
-
-app.get('/', function(req,res) {
-  res.sendfile('index.html');
-});
-
 
 // ROUTES FOR OUR API
 // =============================================================================
@@ -188,8 +182,15 @@ router.route('/filelist')
     })
 	});
 
+router.route('*', function(req, res, next) {
+  // Just send the index.html for other files to support HTML5Mode
+  res.sendFile('/app/index.html', { root: __dirname });
+});
+
 // REGISTER OUR ROUTES -------------------------------
 app.use('/api', router);
+
+// INDEX
 
 
 // START THE SERVER
